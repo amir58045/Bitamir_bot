@@ -1,0 +1,1 @@
+worker python Bitamir_bot.py
