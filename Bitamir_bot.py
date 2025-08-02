@@ -1,8 +1,12 @@
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
 import datetime
+import os
+from dotenv import load_dotenv
 
-TOKEN = os.getenv("BOT_TOKEN")  # ← اینجا توکن رباتت رو از BotFather بذار
+load_dotenv()  # این خط فایل .env را می‌خواند و متغیرها را بارگذاری می‌کند
+
+TOKEN = os.getenv("BOT_TOKEN")  # توکن را از متغیر محیطی می‌خواند
 
 ADMIN_CHAT_ID = 7316295445  # ← اینجا عدد آیدی عددی تلگرام خودت (ادمین) بذار (مثلا ۹ رقمی یا ۱۰ رقمی)
 
