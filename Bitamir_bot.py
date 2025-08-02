@@ -1,18 +1,17 @@
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters, ContextTypes
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 import datetime
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # این خط فایل .env را می‌خواند و متغیرها را بارگذاری می‌کند
+load_dotenv()  # خواندن متغیرهای محیطی از فایل .env
 
-TOKEN = os.getenv("BOT_TOKEN")  # توکن را از متغیر محیطی می‌خواند
+TOKEN = os.getenv("BOT_TOKEN")  # توکن ربات
 
-ADMIN_CHAT_ID = 7316295445  # ← اینجا عدد آیدی عددی تلگرام خودت (ادمین) بذار (مثلا ۹ رقمی یا ۱۰ رقمی)
+ADMIN_CHAT_ID = 7316295445  # آیدی عددی تلگرام ادمین
 
-ORDERS_FILE = "orders.txt"  # ← مسیر فایل ذخیره سفارشات
+ORDERS_FILE = "orders.txt"  # مسیر فایل ذخیره سفارشات
 
-# کیبورد سفارشی پایین نوار تایپ
 custom_keyboard = [
     ["📂 دریافت نسخه تستی", "💳 خرید"],
     ["🆘 پشتیبانی", "📝 ثبت سفارش"]
@@ -51,14 +50,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == "📝 ثبت سفارش":
         await update.message.reply_text("لطفا شماره فیش پرداخت یا اطلاعات سفارش خود را ارسال کنید:")
 
-        # ست کردن وضعیت (context.user_data) برای انتظار پیام سفارش
         context.user_data["waiting_order"] = True
 
     else:
-        # اگر منتظر سفارش بودیم، پیام رو ذخیره کن و تایید بده
         if context.user_data.get("waiting_order"):
             user = update.message.from_user
-            text = update.message.text
             now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             order_line = f"{now} | User ID: {user.id} | Username: @{user.username} | Info: {text}\n"
 
@@ -68,14 +64,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await update.message.reply_text("✅ سفارش شما ثبت شد. پس از بررسی، فایل برای شما ارسال خواهد شد.")
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=f"سفارش جدید:\n{order_line}")
 
-            # خارج شدن از حالت انتظار سفارش
             context.user_data["waiting_order"] = False
 
         else:
             await update.message.reply_text("لطفا یکی از دکمه‌ها را انتخاب کنید.")
 
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & (~filters.COMMAND), handle_message))
