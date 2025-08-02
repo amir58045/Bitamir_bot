@@ -1,17 +1,21 @@
 from telegram import Update, ReplyKeyboardMarkup
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from telegram.ext import ApplicationBuilder, CommandHandler, MessageHandler, filters
+from telegram.ext import (
+    Application,
+    CommandHandler,
+    MessageHandler,
+    ContextTypes,
+    filters,
+)
 import datetime
 import os
 from dotenv import load_dotenv
 
-load_dotenv()  # خواندن متغیرهای محیطی از فایل .env
+# Load environment variables
+load_dotenv()
+TOKEN = os.getenv("BOT_TOKEN")
 
-TOKEN = os.getenv("BOT_TOKEN")  # توکن ربات
-
-ADMIN_CHAT_ID = 7316295445  # آیدی عددی تلگرام ادمین
-
-ORDERS_FILE = "orders.txt"  # مسیر فایل ذخیره سفارشات
+ADMIN_CHAT_ID = 7316295445
+ORDERS_FILE = "orders.txt"
 
 custom_keyboard = [
     ["📂 دریافت نسخه تستی", "💳 خرید"],
@@ -37,12 +41,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     elif text == "💳 خرید":
         await update.message.reply_text(
             "💳 (یا معادل تومان)\n"
-            "برای پداخت از ادرس های زیر استفاده کنید . سفارش در کمتر از 15 دقیقه تکمیل خواهد شد :\n"
-            "bep20 address\n"
-            "0x1627Cf122aC0EA8880144D8D65bBD927ee1594dD\n"
-            "trc20 address\n"
-            "TMkHUjTQA1u4qBE84G4QdZKPkNgEZo1a1e\n"
-            "پس از پرداخت، برای دریافت فایل خریداری شده با دکمه «📝 ثبت سفارش» اقدام کن."
+            "برای پرداخت از آدرس‌های زیر استفاده کنید. سفارش در کمتر از ۱۵ دقیقه تکمیل خواهد شد:\n"
+            "BEP20:\n`0x1627Cf122aC0EA8880144D8D65bBD927ee1594dD`\n"
+            "TRC20:\n`TMkHUjTQA1u4qBE84G4QdZKPkNgEZo1a1e`\n"
+            "پس از پرداخت، برای دریافت فایل خریداری‌شده با دکمه «📝 ثبت سفارش» اقدام کن.",
+            parse_mode="Markdown"
         )
 
     elif text == "🆘 پشتیبانی":
@@ -50,7 +53,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     elif text == "📝 ثبت سفارش":
         await update.message.reply_text("لطفا شماره فیش پرداخت یا اطلاعات سفارش خود را ارسال کنید:")
-
         context.user_data["waiting_order"] = True
 
     else:
@@ -66,12 +68,11 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
             await context.bot.send_message(chat_id=ADMIN_CHAT_ID, text=f"سفارش جدید:\n{order_line}")
 
             context.user_data["waiting_order"] = False
-
         else:
             await update.message.reply_text("لطفا یکی از دکمه‌ها را انتخاب کنید.")
 
 def main():
-    app = ApplicationBuilder().token(TOKEN).build()
+    app = Application.builder().token(TOKEN).build()
 
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
